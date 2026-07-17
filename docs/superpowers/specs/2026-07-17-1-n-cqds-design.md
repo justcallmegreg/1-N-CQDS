@@ -60,6 +60,8 @@ Router-owned. Every phase skill obeys them.
 
 1. **Stateless-first** — a backend service must be killable at any instant with no loss. No local sessions, no in-process shared state, no sticky routing, no local writes outside `/tmp` scratch.
 2. **Complexity minimalism** — every component added is operational burden forever. Absence is the default; presence needs a reason on record.
+
+   **Scope of this invariant: operational components only** — things you run, monitor, and back up. It does *not* govern code conventions. A YAML dictionary, a repository interface, or a logging convention adds no operational surface, so the reasoning that rejects premature Redis does not transfer to them. Conventions that are cheap now and expensive to retrofit should be adopted by default, not gated.
 3. **One backend language** — chosen once, all N services use it. (Frontend TypeScript is not a violation; it is a different tier.)
 4. **Evidence before components** — no component enters on a hunch. A named pattern or a measurement, or it does not enter.
 
@@ -177,6 +179,35 @@ repo/
 - Mock is built **after** the tech stack is decided, on the chosen framework.
 - **Coolify is the preview host** for the mock — a deployment target giving stakeholders a clickable URL before backends exist. Coolify is not a mock authoring tool.
 
+### Localization
+
+**`building-frontend` always asks whether localization is needed.** i18n is cheap to adopt at scaffold and expensive to retrofit — adding it later means touching every string in the codebase. Per invariant 2's scope clause, this is a code convention, not an operational component, so it is not gated on evidence.
+
+**Strings live in YAML dictionaries**, one file per locale, hand-editable and translator-friendly: `frontend/src/locales/{locale}.yaml`.
+
+**Runtime switching is mandatory.** The user can change language on the fly — no rebuild, no full page reload.
+
+**Implementation falls out of an SEO constraint**, like every other decision in the doctrine:
+
+| Frontend shape | Strategy |
+|---|---|
+| Public / indexed (content-shaped) | **Routed locales** (`/en/`, `/de/`) + client-side navigation — instant, shareable, indexable |
+| Auth-gated dashboard (app-shaped) | **Client-side locale store** — true in-place swap, no navigation |
+
+**Persistence: cookie.** SSR reads it, so first paint is already in the right language — no flash of the default locale. Chosen over `localStorage` (invisible to SSR, guarantees a flash) and URL-only (a bare visit to `/` always lands in the default language).
+
+**Dictionary loading:** the active locale ships eagerly; additional locales lazy-load on switch. Shipping every locale to the client is acceptable at two or three and a bundle-size problem at twenty.
+
+**RTL is asked separately from the locale list.** It is the expensive part — it changes layout, CSS logical properties, and icon direction, not just strings. Arabic or Hebrew in scope is a materially different commitment than French or German, and `frontend-design` needs to know before it designs anything.
+
+#### The localization boundary
+
+**Backends return stable codes. The frontend owns every human-readable string.**
+
+This is *entailed* by the on-the-fly switching requirement, not an independent preference: if a backend returned a localized message and the user switched language, that string would be stale on screen — still in the old language, unable to re-render without re-issuing the request. Runtime switching only works if the frontend owns the strings.
+
+Consequences: backends stay locale-free and stateless (reinforcing invariant 1), and the repository has exactly one set of dictionaries rather than one per service.
+
 ## Delivery
 
 `wiring-delivery` branches once on **GitHub vs GitLab** and emits the matching set: build-and-push, test, Trivy.
@@ -240,6 +271,10 @@ On C4: `scaffolding-repository` hand-authors the initial Context and Container d
 | Template tiers | T1 Python+Go, T2 doctrine-only | Python-only; all five fully templated |
 | Frontend alts | Astro default, Next.js alternative | SvelteKit; Vite SPA; Astro-only |
 | Support window | Always ask | Default N-1; default N-2 |
+| Localization | Always asked; YAML dictionaries; runtime switching mandatory | Gating i18n on evidence; JSON dictionaries |
+| i18n strategy | Routed if indexed, client store if not | Always routed; always client store |
+| Locale persistence | Cookie | localStorage; URL-only |
+| i18n boundary | Backends return codes, frontend owns strings | Backend `Accept-Language` localization |
 
 ## Out of scope
 
@@ -247,4 +282,5 @@ On C4: `scaffolding-repository` hand-authors the initial Context and Container d
 - C/C++ backends
 - Full scaffolding for Java, C#, Rust
 - Per-service independent versioning
+- Backend-side localization (backends return codes; see The localization boundary)
 - Legal advice on commercial licensing
