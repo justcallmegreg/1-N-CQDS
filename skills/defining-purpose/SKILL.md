@@ -48,12 +48,11 @@ Write `docs/purpose.md`:
 
 | Excuse | Reality |
 |---|---|
-| "Not a vision workshop, just the questions that gate the first table" | Schema-scoped purpose isn't purpose. `deciding-architecture` step 7 needs users, success, and non-goals to size N — a single table-fork question starves all three. |
-| "I'll assume sessions plus caching your recent lookups — say the word if [otherwise]" | An unconfirmed assumption about a read pattern is exactly the evidence the cache gate asks for, except no one confirmed it. Ask and record it; don't let a guess pass as evidence. |
+| "Not a vision workshop, just the questions that literally gate the first table" | Schema-scoped purpose isn't purpose. `deciding-architecture` step 7 needs users, success, and non-goals to size N — a single table-fork question starves all three. |
+| "I'll assume sessions plus caching your recent-lifts / PR lookups — say the word if [otherwise]" | An unconfirmed assumption about a read pattern is exactly the evidence the cache gate asks for, except no one confirmed it. Ask and record it; don't let a guess pass as evidence. |
 | "It stays as specified" / "I won't revisit the stack" (said, but never written down) | Respecting the stack is correct. Not recording it isn't — `docs/purpose.md`'s Stated constraints field is what turns "I didn't argue" into evidence `deciding-architecture` can actually cite. |
 
 ## Red Flags — STOP
 
-- Asking only the one question that unblocks the next artifact, then assuming the rest
-- Treating the user's stack as settled without writing it into Stated constraints
-- Arguing the stack, or lecturing about "the right way" — both fail this gate exactly as hard as skipping it
+- Asking one question, then filling in the rest by assumption ("I'll assume sessions plus caching your recent-lifts / PR lookups... say the word if [otherwise]")
+- Saying "it stays as specified" / "I won't revisit the stack" and never writing it into Stated constraints
