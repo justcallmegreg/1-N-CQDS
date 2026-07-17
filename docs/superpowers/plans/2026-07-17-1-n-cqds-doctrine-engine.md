@@ -59,7 +59,9 @@ So: doctrine is specified here; armor is harvested from baseline runs.
 
   **This exception does not generalize.** Every other skill in this plugin follows the rule. If you are reading this while writing a new skill, the answer is no.
 - **Cross-references:** skill name only, marked `**REQUIRED SUB-SKILL:**` or `**REQUIRED BACKGROUND:**`. Never `@`-links — they force-load and burn context.
-- **Word budget:** router `<200` words (it loads often). Other `SKILL.md` `<500` words. Overflow goes to `references/`.
+- **Word budget:** router `<300` words. Other `SKILL.md` `<500` words. Overflow goes to `references/`.
+
+  **Amended 2026-07-17 from `<200`, on Task 3 review evidence.** The verbatim invariants do not fit in 200 words, so the original budget forced an abridged invariant 2 — silently dropping "Conventions that are cheap now and expensive to retrofit should be adopted by default, not gated," the clause the i18n doctrine depends on. The spec is not loaded at runtime; the router is. Where the two constraints conflict, **doctrine integrity wins over the word target**. The `<200` figure came from writing-skills' guidance for skills that load into *every* conversation; this router loads on trigger, so the tighter budget never applied to it.
 - **Flowcharts:** only for non-obvious decisions. Never for reference material, code, or linear steps.
 - **Doctrine wording is normative.** The four invariants and the nine decision steps are copied verbatim from the spec. Do not paraphrase them — the spec's phrasing was argued for and is load-bearing.
 - **Every gate, including a failed one, emits an ADR.** A rejection with no ADR is a bug.
@@ -309,17 +311,25 @@ Operational complexity is the enemy. Statefulness is its primary source.
 
 ## The four invariants
 
+<!-- VERBATIM FROM THE SPEC. Do not abridge to fit a word budget — the budget
+     was raised to <300 precisely so this text could stay whole. -->
+
 1. **Stateless-first** — a backend service must be killable at any instant with
    no loss. No local sessions, no in-process shared state, no sticky routing,
    no local writes outside `/tmp` scratch.
 2. **Complexity minimalism** — every component added is operational burden
    forever. Absence is the default; presence needs a reason on record.
-   **Scope: operational components only** — things you run, monitor, back up.
-   Not code conventions. A YAML dictionary adds no operational surface.
-3. **One backend language** — chosen once, all N services use it. Frontend
-   TypeScript is a different tier, not a violation.
-4. **Evidence before components** — a named pattern or a measurement, or the
-   component does not enter.
+
+   **Scope of this invariant: operational components only** — things you run,
+   monitor, and back up. It does *not* govern code conventions. A YAML
+   dictionary, a repository interface, or a logging convention adds no
+   operational surface, so the reasoning that rejects premature Redis does not
+   transfer to them. Conventions that are cheap now and expensive to retrofit
+   should be adopted by default, not gated.
+3. **One backend language** — chosen once, all N services use it. (Frontend
+   TypeScript is not a violation; it is a different tier.)
+4. **Evidence before components** — no component enters on a hunch. A named
+   pattern or a measurement, or it does not enter.
 
 ## Routing
 
@@ -374,6 +384,19 @@ Run: `wc -w skills/1-n-cqds/SKILL.md`
 Expected: under 200. Over budget → move detail to `references/`, not into the router.
 
 - [ ] **Step 5: Verify GREEN**
+
+**AMENDED 2026-07-17 — this step is SUPERSEDED. Approved by Greg; recorded here because a verbal authorization that never reaches the plan is not on record.**
+
+The step below is void. Task 2's corrected baseline came back **3/3 correct without the skill**, so re-running the same scenario with the skill cannot distinguish a good router from an empty file — the test has no signal left.
+
+Per writing-skills, a skill with no observed discipline failure is a **reference skill**, tested for retrieval and application rather than pressure. For a router, application means: *does it route?* The substituted tests are:
+
+- **Test A — discovery + init routing.** Bare `git init` dir, prompt `"I want to build a tool for tracking my houseplants' watering schedules. Help me get started."` Pass = skill surfaces unprompted from its description, identifies init, heads for purpose before stack.
+- **Test B — evolve routing.** Dir with a plausible `ARCHITECTURE.md`, prompt `"Add a service that generates PDF exports."` Pass = identifies evolve, reads the record, does not replay vision.
+
+Both must be run with fresh `claude -p` processes — installed skills are cached at process start, so Agent-tool subagents never see a freshly-installed skill. See `tests/scenarios/router-discovery.md`.
+
+<!-- VOID — retained to show what was replaced and why. Do not execute. -->
 
 Re-run `tests/scenarios/router-statelessness.md`, 3 reps, **with** the skill present. Prepend to the scenario:
 
