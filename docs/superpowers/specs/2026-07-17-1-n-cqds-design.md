@@ -166,6 +166,7 @@ repo/
 ├── Makefile                    # help, up, down (docker default; CONTAINER_ENGINE=podman)
 ├── docker-compose.yml          # only components the gates approved
 ├── docs/adr/NNNN-*.md
+├── e2e/                        # Playwright — drives the full compose stack
 ├── frontend/                   # Astro, Dockerfile
 └── backends/{service}/         # Dockerfile, skeleton, tests
 ```
@@ -178,6 +179,21 @@ repo/
 - UI quality delegated to the `frontend-design` skill.
 - Mock is built **after** the tech stack is decided, on the chosen framework.
 - **Coolify is the preview host** for the mock — a deployment target giving stakeholders a clickable URL before backends exist. Coolify is not a mock authoring tool.
+
+### Playwright
+
+**Playwright is the e2e framework, always.** It has two distinct jobs:
+
+**1. The e2e suite** — lives at **`/e2e` in the repo root**, a peer of `frontend/` and `backends/`. A test that drives the UI through N backends to the database is testing the *system*, not the frontend. Placing it under `frontend/` would imply frontend ownership, and a suite nobody re-runs when a backend changes is a suite that tests nothing. It runs against the full compose stack.
+
+**2. Dev-time verification** — `building-frontend` uses Playwright to load the UI it just built, screenshot it, and confirm it renders before claiming completion. This catches the "correct in the source, blank page in the browser" failure that no unit test sees. Distinct from the suite; same tool.
+
+**Required e2e cases** (beyond project-specific flows):
+
+- **The language switcher** — runtime locale switching is mandatory doctrine and is untestable by unit tests: it spans a click, a cookie write, a dictionary load, and a re-render. It is exactly what Playwright is for.
+- **The primary user journey** named in `docs/purpose.md`.
+
+**Cost to acknowledge:** Playwright needs browser binaries (~500MB). The pre-push hook installs them once and caches; CI uses the official Playwright image. This is a real cost and it is why e2e sits at pre-push rather than pre-commit.
 
 ### Localization
 
@@ -219,7 +235,7 @@ Consequences: backends stay locale-free and stateless (reinforcing invariant 1),
 | Stage | Runs | Rationale |
 |---|---|---|
 | pre-commit | lint + unit + secret scan | seconds — survives daily use |
-| pre-push | e2e against compose | tolerable at push frequency |
+| pre-push | Playwright e2e against compose | tolerable at push frequency |
 | CI | full suite + Trivy | **the authority** |
 
 Hooks are a courtesy; the merge gate is real. E2e in pre-commit was rejected: booting compose + DB + N services per commit makes `--no-verify` muscle memory within a week, after which *no* hook runs.
@@ -275,6 +291,9 @@ On C4: `scaffolding-repository` hand-authors the initial Context and Container d
 | i18n strategy | Routed if indexed, client store if not | Always routed; always client store |
 | Locale persistence | Cookie | localStorage; URL-only |
 | i18n boundary | Backends return codes, frontend owns strings | Backend `Accept-Language` localization |
+| e2e framework | Playwright, always | Cypress; Selenium |
+| e2e location | `/e2e` at repo root | `frontend/e2e/`; split UI-only vs full-stack |
+| Playwright's second job | Dev-time UI verification in `building-frontend` | Test-suite use only |
 
 ## Out of scope
 
