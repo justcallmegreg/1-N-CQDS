@@ -1,0 +1,14 @@
+{
+  "name": "1-n-cqds-local",
+  "owner": {
+    "name": "Greg Nagy",
+    "email": "greg@gatecastle.com"
+  },
+  "plugins": [
+    {
+      "name": "1-n-cqds",
+      "source": "./",
+      "description": "1-N-CQDS architecture methodology"
+    }
+  ]
+}
