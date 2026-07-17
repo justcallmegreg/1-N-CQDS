@@ -1,11 +1,11 @@
 ---
 name: 1-n-cqds
-description: ALWAYS invoke this BEFORE superpowers:brainstorming for any new software project, choosing a tech stack, adding a backend service, or judging component fit in a 1-N-CQDS repo
+description: Use when starting any software project, before any tech-stack, database, cache, queue, or storage decision, or when adding a backend service or judging component fit in a 1-N-CQDS repo
 ---
 
 # 1-N-CQDS
 
-**1** frontend, **N** backend services, **C**ache, **Q**ueue, **D**atabase, **S**torage.
+**1** frontend, **N** backends, **C**ache, **Q**ueue, **D**atabase, **S**torage.
 
 ## Invariants
 
