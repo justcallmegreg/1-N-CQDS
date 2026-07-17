@@ -46,6 +46,18 @@ So: doctrine is specified here; armor is harvested from baseline runs.
 - **Skill frontmatter:** exactly two fields, `name` and `description`. Max 1024 chars total.
 - **`name`:** letters, numbers, hyphens only. Must match its directory name.
 - **`description`:** third person, starts with `Use when`, states **triggering conditions only**. **Never summarize the skill's workflow** — a description that summarizes process becomes a shortcut agents take instead of reading the skill.
+
+  **DOCUMENTED EXCEPTION — the `1-n-cqds` router only.** Approved by Greg, 2026-07-17, on evidence from Task 3.
+
+  The router's description uses an imperative form that names `superpowers:brainstorming` directly. This violates the rule above and is deliberate.
+
+  **Evidence:** compliant wording scored **0/9** on greenfield discovery — nine reps across three candidate wordings, zero invocations. Every rep went to `superpowers:brainstorming` and stayed. Evolve-mode triggers ("add a service") scored 3/3 with the same compliant wording.
+
+  **Cause:** `superpowers:using-superpowers` injects `"Let's build X" → superpowers:brainstorming first` into the always-loaded session context. That is a directive, not a competing description. A description cannot outrank a directive; only a directive that contradicts it by name can.
+
+  **Accepted risk:** if superpowers renames or restructures that rule, the router silently loses init-mode discovery. Mitigated two ways — (1) `tests/scenarios/router-discovery.md` is a committed regression test that catches it, and (2) `deciding-architecture` independently owns the stack/database/component triggers, so the doctrine still engages at decision time even if the router's description stops winning.
+
+  **This exception does not generalize.** Every other skill in this plugin follows the rule. If you are reading this while writing a new skill, the answer is no.
 - **Cross-references:** skill name only, marked `**REQUIRED SUB-SKILL:**` or `**REQUIRED BACKGROUND:**`. Never `@`-links — they force-load and burn context.
 - **Word budget:** router `<200` words (it loads often). Other `SKILL.md` `<500` words. Overflow goes to `references/`.
 - **Flowcharts:** only for non-obvious decisions. Never for reference material, code, or linear steps.
