@@ -34,12 +34,17 @@ Enumerate every piece of state the software holds. This is the root
 question; everything below is a consequence. A service with no state in the
 inventory needs no persistence decision at all.
 
-Record it in `ARCHITECTURE.md` before step 2.
+For each item, record a name, a shape, a lifetime, and a size estimate.
+Write the inventory into `ARCHITECTURE.md` before step 2.
 
 ## Step 7 — Service decomposition
 
-The N, derived from the purpose — not from taxonomy. Applying invariant 2:
-default N is 1; a second service needs a reason on record.
+The N, derived from the purpose — not from taxonomy. "User service, auth
+service, notification service" is a template, not a design. Each service
+must trace to something the purpose says the software does.
+
+Applying invariant 2: default N is 1; a second service needs a reason on
+record.
 
 ## Rejections are first-class
 

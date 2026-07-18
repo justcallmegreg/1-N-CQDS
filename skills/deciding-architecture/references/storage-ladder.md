@@ -14,3 +14,9 @@ names it as debt and states the constraint forcing it.
 Scratch under `/tmp`, discarded within one request, is not state — invariant 1
 already permits it (`No local writes outside /tmp scratch`) — and does not
 enter this ladder.
+
+## Why blobs never go in the database
+
+Blobs in a database inflate backups, slow replication, and blow out row
+sizes for data nobody queries. The DB stores the metadata and the key; the
+object store holds the bytes.
