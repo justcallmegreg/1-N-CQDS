@@ -26,3 +26,18 @@ def test_emits_base_directory_layout(tmp_path):
 def test_version_txt_is_single_source(tmp_path):
     out = run_scaffold(tmp_path, BASE_CONFIG)
     assert (out / "VERSION.txt").read_text().strip() == "0.1.0"
+
+def test_makefile_has_mandatory_targets(tmp_path):
+    out = run_scaffold(tmp_path, BASE_CONFIG)
+    mk = (out / "Makefile").read_text()
+    for target in ["help:", "up:", "down:"]:
+        assert target in mk, f"missing target {target}"
+    # docker is default, podman overridable
+    assert "CONTAINER_ENGINE ?= docker" in mk
+
+def test_makefile_help_runs(tmp_path):
+    out = run_scaffold(tmp_path, BASE_CONFIG)
+    import subprocess
+    r = subprocess.run(["make", "-C", str(out), "help"], capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert "up" in r.stdout and "down" in r.stdout

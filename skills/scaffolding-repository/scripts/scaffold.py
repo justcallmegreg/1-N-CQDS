@@ -8,18 +8,30 @@ ARCHITECTURE.md; this script only ever sees the config.
 import argparse, json, sys
 from pathlib import Path
 
+ASSETS = Path(__file__).parent.parent / "assets"
+
 def load_config(args) -> dict:
     if args.config:
         return json.loads(Path(args.config).read_text())
     return json.loads(sys.stdin.read())
 
+def render(template_name: str, mapping: dict) -> str:
+    text = (ASSETS / template_name).read_text()
+    for k, v in mapping.items():
+        text = text.replace("{{" + k + "}}", str(v))
+    return text
+
 def scaffold(config: dict, dest: Path) -> list[Path]:
     created = []
     def mkdir(rel):
-        p = dest / rel; p.mkdir(parents=True, exist_ok=True); created.append(p)
+        p = dest / rel
+        p.mkdir(parents=True, exist_ok=True)
+        created.append(p)
     def write(rel, content):
-        p = dest / rel; p.parent.mkdir(parents=True, exist_ok=True)
-        p.write_text(content); created.append(p)
+        p = dest / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(content)
+        created.append(p)
 
     mkdir("docs/adr")
     mkdir("e2e")
@@ -27,6 +39,7 @@ def scaffold(config: dict, dest: Path) -> list[Path]:
     for svc in config["services"]:
         mkdir(f"backends/{svc}")
     write("VERSION.txt", config["version"] + "\n")
+    write("Makefile", render("Makefile.tmpl", {"NAME": config["name"]}))
     return created
 
 def main():
