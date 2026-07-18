@@ -22,14 +22,17 @@ lands once for every future project.
 ## Steps
 
 1. **Read `ARCHITECTURE.md`.** From the Stack table, take language, database,
-   portability layer, object storage, cache, and queue. From the C4 Container
-   diagram, take the frontend framework. Take the system name from the title,
-   and service names from the service-decomposition ADR (default: one
-   service, named after the system). Version comes from `VERSION.txt` if
-   present, else `0.1.0`. **A component the ADRs rejected shows as None in
-   the Stack table — it must be `null` in the config, and it must not enter
-   compose.** This is invariant 4 at the repo level: a rejected component in
-   compose is a bug.
+   portability layer, object storage, cache, and queue. The H1 is the fixed
+   literal "Architecture," not the system name — take `name` (the config's
+   most load-bearing key: it seeds the Postgres user/db, MinIO root user,
+   README H1, Makefile header, and CODEOWNERS teams) from the C4 Context
+   diagram's `System(sys, "{SYSTEM}", ...)` node instead. From the C4
+   Container diagram, take the frontend framework. Take service names from
+   the service-decomposition ADR (default: one service, named after the
+   system). Version comes from `VERSION.txt` if present, else `0.1.0`. **A
+   component the ADRs rejected shows as None in the Stack table — it must be
+   `null` in the config, and it must not enter compose.** This is invariant 4
+   at the repo level: a rejected component in compose is a bug.
 
 2. **Build the config dict** (see `scripts/scaffold.py --help`):
 
@@ -41,9 +44,12 @@ lands once for every future project.
     "services": ["..."]}
    ```
 
-   Omit `container_engine`. The emitted Makefile always defaults to Docker
-   with a runtime override (`make up CONTAINER_ENGINE=podman`); no config key
-   changes that default, so don't add one expecting it to.
+   Omit `container_engine` — the Makefile always defaults to Docker with a
+   runtime override (`make up CONTAINER_ENGINE=podman`); no config key
+   changes that. Keep `language` and `frontend` though: unlike
+   `container_engine`, they're real decisions `scaffold.py` doesn't consume
+   yet but Plans 3-4 will (language → service skeletons/Dockerfiles; frontend
+   → the app itself).
 
 3. **Confirm the license with the user** if `ARCHITECTURE.md` didn't record
    one. Open source is preferred; for a commercial/BSL choice, state plainly
