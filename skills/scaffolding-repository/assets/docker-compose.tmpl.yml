@@ -17,6 +17,34 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+# --- DATABASE:mariadb ---
+  db:
+    image: mariadb:11.4
+    environment:
+      MARIADB_USER: {{NAME}}
+      MARIADB_PASSWORD: devpassword
+      MARIADB_DATABASE: {{NAME}}
+      MARIADB_ROOT_PASSWORD: devpassword
+    ports: ["3306:3306"]
+    volumes: ["db_data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+# --- DATABASE:mongodb ---
+  db:
+    image: mongo:7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: {{NAME}}
+      MONGO_INITDB_ROOT_PASSWORD: devpassword
+    ports: ["27017:27017"]
+    volumes: ["db_data:/data/db"]
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 # --- OBJECT_STORAGE:minio ---
   objectstore:
     image: minio/minio:RELEASE.2024-08-17T01-24-54Z

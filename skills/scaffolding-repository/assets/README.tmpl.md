@@ -30,6 +30,12 @@ make help    # list targets
 
 ## Architecture (C4 — Context)
 
+Illustrative only — this diagram is a fixed placeholder and does not
+reflect which components this repository's architecture actually approved
+(a stateless service, for example, may have no database at all). For the
+diagram synthesized from the real, gate-approved decisions, see
+[`ARCHITECTURE.md`](./ARCHITECTURE.md).
+
 ```mermaid
 C4Context
   title System Context — {{NAME}}

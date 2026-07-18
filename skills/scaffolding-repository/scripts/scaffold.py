@@ -12,6 +12,19 @@ ASSETS = Path(__file__).parent.parent / "assets"
 
 VALID_LICENSES = {"MIT", "Apache-2.0", "MPL-2.0", "AGPL-3.0", "BSL-1.1"}
 
+# Gate-approved component values. A component key may also be null (rejected
+# by the architecture ADRs) — that is always permitted and yields no
+# fragment. Any other, unrecognized value must fail loudly rather than
+# silently emitting nothing: a silently-dropped APPROVED component is
+# indistinguishable from a correctly-omitted REJECTED one, which is exactly
+# the doctrine-fidelity bug this validation exists to prevent.
+KNOWN_COMPONENTS = {
+    "database": {"postgres", "mariadb", "mongodb", None},
+    "object_storage": {"minio", None},
+    "cache": {"redis", None},
+    "queue": {"rabbitmq", None},
+}
+
 def load_config(args) -> dict:
     if args.config:
         return json.loads(Path(args.config).read_text())
@@ -50,7 +63,8 @@ def render_compose(config: dict) -> str:
             frags[cur].append(line)
     def block(name): return "\n".join(frags.get(name, []))
     comp = config["components"]
-    has_db = comp.get("database") == "postgres"
+    db = comp.get("database")
+    has_db = db in {"postgres", "mariadb", "mongodb"}
     has_obj = comp.get("object_storage") == "minio"
     has_cache = comp.get("cache") == "redis"
     has_queue = comp.get("queue") == "rabbitmq"
@@ -66,7 +80,10 @@ def render_compose(config: dict) -> str:
         volumes_lines[-1] = "volumes: {}"
 
     out = ["\n".join(header_lines)]
-    if has_db: out.append(block("DATABASE:postgres"))
+    if db == "postgres": out.append(block("DATABASE:postgres"))
+    elif db == "mariadb": out.append(block("DATABASE:mariadb"))
+    elif db == "mongodb": out.append(block("DATABASE:mongodb"))
+    # db is None (or, after validation in scaffold(), never anything else) -> no fragment
     if has_obj: out.append(block("OBJECT_STORAGE:minio"))
     if has_cache: out.append(block("CACHE:redis"))
     if has_queue: out.append(block("QUEUE:rabbitmq"))
@@ -83,6 +100,11 @@ def scaffold(config: dict, dest: Path) -> list[Path]:
     lic = config["license"]
     if lic not in VALID_LICENSES:
         raise SystemExit(f"unknown license '{lic}'; choose one of {sorted(VALID_LICENSES)}")
+
+    for key, allowed in KNOWN_COMPONENTS.items():
+        val = config["components"].get(key)
+        if val not in allowed:
+            raise SystemExit(f"unsupported {key} '{val}'; known: {sorted(x for x in allowed if x)}")
 
     created = []
     def mkdir(rel):

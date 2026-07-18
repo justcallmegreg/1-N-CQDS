@@ -61,6 +61,61 @@ def test_compose_includes_cache_when_approved(tmp_path):
     out = run_scaffold(tmp_path, cfg)
     assert "redis" in (out / "docker-compose.yml").read_text().lower()
 
+def test_compose_includes_queue_when_approved(tmp_path):
+    # Mirrors test_compose_includes_cache_when_approved — the queue-approved
+    # path was never exercised (only queue-rejected was), an asymmetric gap.
+    cfg = dict(BASE_CONFIG); cfg["components"] = dict(BASE_CONFIG["components"], queue="rabbitmq")
+    out = run_scaffold(tmp_path, cfg)
+    assert "rabbitmq" in (out / "docker-compose.yml").read_text().lower()
+
+def test_compose_mariadb(tmp_path):
+    # database="mariadb" is a gate-approved value distinct from postgres.
+    # Prior to the fix, render_compose only recognized "postgres" and
+    # silently emitted no db service for any other approved engine —
+    # indistinguishable from a rejected database. Guard against regressing
+    # that silent-drop bug.
+    cfg = dict(BASE_CONFIG); cfg["components"] = dict(BASE_CONFIG["components"], database="mariadb")
+    out = run_scaffold(tmp_path, cfg)
+    compose_path = out / "docker-compose.yml"
+    compose = compose_path.read_text()
+    assert "  db:" in compose
+    assert "mariadb" in compose.lower()
+    assert "postgres" not in compose.lower()
+    import shutil
+    engine = "docker" if shutil.which("docker") else ("podman" if shutil.which("podman") else None)
+    if not engine:
+        import pytest; pytest.skip("no container engine available")
+    r = subprocess.run([engine, "compose", "-f", str(compose_path), "config"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+
+def test_compose_mongodb(tmp_path):
+    cfg = dict(BASE_CONFIG); cfg["components"] = dict(BASE_CONFIG["components"], database="mongodb")
+    out = run_scaffold(tmp_path, cfg)
+    compose_path = out / "docker-compose.yml"
+    compose = compose_path.read_text()
+    assert "  db:" in compose
+    assert "mongo" in compose.lower()
+    assert "postgres" not in compose.lower()
+    import shutil
+    engine = "docker" if shutil.which("docker") else ("podman" if shutil.which("podman") else None)
+    if not engine:
+        import pytest; pytest.skip("no container engine available")
+    r = subprocess.run([engine, "compose", "-f", str(compose_path), "config"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+
+def test_unknown_component_value_errors(tmp_path):
+    # An unsupported component value must fail loudly (like unknown license),
+    # never silently vanish — a silently-dropped APPROVED component is
+    # indistinguishable from a correctly-omitted REJECTED one.
+    cfg = dict(BASE_CONFIG); cfg["components"] = dict(BASE_CONFIG["components"], database="couchdb")
+    out_dir = tmp_path / "cfg2.json"
+    out_dir.write_text(json.dumps(cfg))
+    r = subprocess.run([sys.executable, str(SCRIPT), "--config", str(out_dir), "--dest", str(tmp_path / "o2")],
+                       capture_output=True, text=True)
+    assert r.returncode != 0, "unsupported database value must fail loudly, not silently emit nothing"
+
 def test_compose_config_validates(tmp_path):
     out = run_scaffold(tmp_path, BASE_CONFIG)
     # docker or podman may be absent in CI; skip the runtime check gracefully
