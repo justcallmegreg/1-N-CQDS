@@ -97,6 +97,9 @@ def scaffold(config: dict, dest: Path) -> list[Path]:
     write("VERSION.txt", config["version"] + "\n")
     write("Makefile", render("Makefile.tmpl", {"NAME": config["name"]}))
     write("docker-compose.yml", render_compose(config))
+    write("README.md", render("README.tmpl.md", {"NAME": config["name"]}))
+    write(".gitignore", render("gitignore.tmpl", {}))
+    write("CODEOWNERS", render("CODEOWNERS.tmpl", {"NAME": config["name"]}))
     return created
 
 def main():

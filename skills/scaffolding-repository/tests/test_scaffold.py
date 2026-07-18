@@ -71,6 +71,19 @@ def test_compose_config_validates(tmp_path):
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
 
+def test_readme_has_c4_and_links_architecture(tmp_path):
+    out = run_scaffold(tmp_path, BASE_CONFIG)
+    readme = (out / "README.md").read_text()
+    assert "```mermaid" in readme
+    assert "C4Context" in readme
+    assert "ARCHITECTURE.md" in readme  # must link the decision record
+    assert "make up" in readme          # getting started
+
+def test_codeowners_and_gitignore_emitted(tmp_path):
+    out = run_scaffold(tmp_path, BASE_CONFIG)
+    assert (out / ".gitignore").exists()
+    assert (out / "CODEOWNERS").exists()
+
 def test_compose_valid_with_zero_infra_components(tmp_path):
     # A genuinely stateless service could reject database, object storage,
     # cache, AND queue. services:/volumes: must still be valid YAML mappings,
