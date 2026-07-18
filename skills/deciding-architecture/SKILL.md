@@ -56,3 +56,16 @@ reconsideration. **A rejection with no ADR is a bug.**
 
 `docs/adr/NNNN-title.md` — 4-digit zero-padded, sequential from `0001`,
 Nygard-style. Template: `assets/adr-template.md`.
+
+## Step 10 — Synthesis
+
+After all nine steps, write `ARCHITECTURE.md` from `assets/ARCHITECTURE.tmpl.md`.
+
+**This file is the init/evolve switch.** The router keys on its existence. If it
+is absent, every future session replays vision. If it is wrong, governor mode
+enforces the wrong doctrine.
+
+The C4 diagrams show Context and Container only. Component and Code levels
+belong to the `c4-architecture` plugin, which regenerates them from real code
+once services exist. At decision time there is no code to analyze — do not
+invent a Component diagram.
