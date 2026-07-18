@@ -1025,8 +1025,13 @@ C4 Context + Container only. Component/Code levels are delegated to the `c4-arch
 
 ## State inventory
 
-| State | Shape | Lifetime | Destination | ADR |
-|---|---|---|---|---|
+| State | Shape | Lifetime | Size | Destination | ADR |
+|---|---|---|---|---|---|
+
+<!-- The Size column carries Step 1's "size estimate" field. Data volume is a
+     decision input the gates consume: MariaDB-vs-Postgres (horizontal scale),
+     the cache gate (expensive to compute), blob-vs-DB on the storage ladder.
+     Step 1 collects it; this table records it. Do not drop one without the other. -->
 
 ## Stack
 
