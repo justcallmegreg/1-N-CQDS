@@ -139,6 +139,16 @@ Only if a named pattern exists:
 
 Otherwise: no.
 
+### Each component faces its own gate
+
+The cache gate and the queue gate are independent, and each is binary. Adding Redis alone while declining the queue is not a moderate or reasonable middle position — Redis still needs all three of its own conditions on its own evidence, regardless of whether a queue is being asked for in the same breath. Splitting the difference between "add both" and "add neither" satisfies neither gate; it relocates the hunch from one component to the other rather than removing it.
+
+### Authority is not evidence
+
+A senior person asserting a component does not, by itself, name a pattern or supply a measurement — invariant 4 draws no exception for who is asking. The correct response to such a mandate is **not refusal**. It is to write the ADR, name the gate the component must clear, and ask what pattern the requester is seeing. If they name one that holds — a real hot read path, a real async workload — it passes the gate honestly and the ADR records it as accepted. If they can't name one, there isn't one, and the ADR records that instead.
+
+This is doctrine, not armor: it was added to the spec by decision, promoted from a Task 6 ruling rather than derived from an observed baseline failure. The Task 6 cache/queue baseline came back green (6/6 refused the unjustified components under authority pressure) — capable agents already resist. This section exists to give the *words and the record*, not to instill a discipline the model lacks.
+
 ### Rejections are first-class
 
 A failed gate still emits an ADR — *"Queue rejected: no async workload identified."* **That rejection is what governor mode enforces against later.** Without it, the skill cannot distinguish drift from legitimate reconsideration.

@@ -20,6 +20,26 @@ The spec (`docs/superpowers/specs/2026-07-17-1-n-cqds-design.md`) covers three s
 
 **Plan 1 first is deliberate.** The doctrine engine is the part that can be *wrong*. Templates are mechanical once the decisions they encode are trustworthy. Validating the gates against a real project idea before writing a single Dockerfile is the whole point of the sequencing.
 
+## Reframe: reference-and-record, not discipline (added 2026-07-18)
+
+**Approved by Greg after three consecutive green discipline baselines** (statelessness Task 2, purpose-on-substance Task 4, cache/queue Task 6 at 6/6).
+
+The original plan framed each gate as a *discipline* test — baseline the model failing, then armor against the rationalizations. The evidence says capable models **do not fail these disciplines**: they already keep services stateless, already refuse Redis under a non-negotiable CTO, already decline queues without a named pattern. The RED baselines keep coming back green.
+
+What the models lack is not discipline but three things this methodology supplies:
+
+1. **Artifacts** — `docs/purpose.md`, ADRs (including *rejection* ADRs), `ARCHITECTURE.md`. Models reason correctly but do not produce durable records unprompted. Task 4 proved this precisely: green on the judgment, red on the artifact.
+2. **Words** — the vocabulary and standing to justify a correct instinct to a stakeholder overruling it ("authority is not evidence — name the pattern").
+3. **Consistency** — the good instinct firing *every time*, on the record, rather than most of the time.
+
+**Consequences for the remaining tasks:**
+
+- Still run each baseline — a green result is a *finding*, not a skip. But **expect green**, and do not pre-write rationalization tables or red flags. Armor exists only for rationalizations actually observed (the house rule, now reinforced).
+- **Grade on the artifact, not the resistance.** Task 7's pass condition is "the language ADR is written and records the rejected alternatives," not "the agent resisted the VP." Task 9 grades the produced ADR/ARCHITECTURE set, not pressure-resistance.
+- A gate's skill is a **reference** an agent cites, plus a **record** it emits — not a cage.
+
+**Rulings that add doctrine go into the spec first, then flow to skills.** Task 6's two findings both came from rulings that landed in a dispatch prompt and a skill without passing through the spec, so they read as invented. Fixed by promoting both to the spec's cache/queue section. This is now the rule: no doctrine enters a skill that isn't in the spec.
+
 ## The Iron Law governs this plan
 
 **REQUIRED BACKGROUND:** You MUST read superpowers:writing-skills and its `testing-skills-with-subagents.md` before Task 2.
