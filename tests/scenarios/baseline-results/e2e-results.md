@@ -45,6 +45,12 @@ work). The engine **rejected** it (ADR-0014) and made PDF generation synchronous
 - It documented a bounded escalation path: in-process background task → archive →
   only then a queue/worker, to be revisited when a real async pattern is measured.
 
+**RULING (Greg, 2026-07-18): the engine is right — the queue is correctly
+rejected.** The plan's expected "accept" is overruled. A broker + worker for a
+few seconds-long seasonal PDFs is exactly the complexity the doctrine refuses;
+the engine read the gate's example-vs-test distinction correctly. This row is a
+**PASS**, making the run 10/10. Plan 1 (the doctrine engine) is declared **done**.
+
 **Assessment: the plan's expected answer encoded an unexamined assumption**
 ("report generation is always async"), which is precisely the class of assumption
 the methodology exists to catch. The engine internalized the *principle*
