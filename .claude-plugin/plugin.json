@@ -1,0 +1,11 @@
+{
+  "name": "1-n-cqds",
+  "description": "Architecture methodology: 1 frontend, N backend services, Cache, Queue, Database, Storage. Stateless-first, complexity-minimal, every component decision recorded as an ADR.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Greg Nagy",
+    "email": "greg@gatecastle.com"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["architecture", "scaffolding", "stateless", "adr", "microservices"]
+}

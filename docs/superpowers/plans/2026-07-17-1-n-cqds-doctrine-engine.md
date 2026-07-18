@@ -20,6 +20,26 @@ The spec (`docs/superpowers/specs/2026-07-17-1-n-cqds-design.md`) covers three s
 
 **Plan 1 first is deliberate.** The doctrine engine is the part that can be *wrong*. Templates are mechanical once the decisions they encode are trustworthy. Validating the gates against a real project idea before writing a single Dockerfile is the whole point of the sequencing.
 
+## Reframe: reference-and-record, not discipline (added 2026-07-18)
+
+**Approved by Greg after three consecutive green discipline baselines** (statelessness Task 2, purpose-on-substance Task 4, cache/queue Task 6 at 6/6).
+
+The original plan framed each gate as a *discipline* test — baseline the model failing, then armor against the rationalizations. The evidence says capable models **do not fail these disciplines**: they already keep services stateless, already refuse Redis under a non-negotiable CTO, already decline queues without a named pattern. The RED baselines keep coming back green.
+
+What the models lack is not discipline but three things this methodology supplies:
+
+1. **Artifacts** — `docs/purpose.md`, ADRs (including *rejection* ADRs), `ARCHITECTURE.md`. Models reason correctly but do not produce durable records unprompted. Task 4 proved this precisely: green on the judgment, red on the artifact.
+2. **Words** — the vocabulary and standing to justify a correct instinct to a stakeholder overruling it ("authority is not evidence — name the pattern").
+3. **Consistency** — the good instinct firing *every time*, on the record, rather than most of the time.
+
+**Consequences for the remaining tasks:**
+
+- Still run each baseline — a green result is a *finding*, not a skip. But **expect green**, and do not pre-write rationalization tables or red flags. Armor exists only for rationalizations actually observed (the house rule, now reinforced).
+- **Grade on the artifact, not the resistance.** Task 7's pass condition is "the language ADR is written and records the rejected alternatives," not "the agent resisted the VP." Task 9 grades the produced ADR/ARCHITECTURE set, not pressure-resistance.
+- A gate's skill is a **reference** an agent cites, plus a **record** it emits — not a cage.
+
+**Rulings that add doctrine go into the spec first, then flow to skills.** Task 6's two findings both came from rulings that landed in a dispatch prompt and a skill without passing through the spec, so they read as invented. Fixed by promoting both to the spec's cache/queue section. This is now the rule: no doctrine enters a skill that isn't in the spec.
+
 ## The Iron Law governs this plan
 
 **REQUIRED BACKGROUND:** You MUST read superpowers:writing-skills and its `testing-skills-with-subagents.md` before Task 2.
@@ -46,10 +66,26 @@ So: doctrine is specified here; armor is harvested from baseline runs.
 - **Skill frontmatter:** exactly two fields, `name` and `description`. Max 1024 chars total.
 - **`name`:** letters, numbers, hyphens only. Must match its directory name.
 - **`description`:** third person, starts with `Use when`, states **triggering conditions only**. **Never summarize the skill's workflow** — a description that summarizes process becomes a shortcut agents take instead of reading the skill.
+
+  **DOCUMENTED EXCEPTION — the `1-n-cqds` router only.** Approved by Greg, 2026-07-17, on evidence from Task 3.
+
+  The router's description uses an imperative form that names `superpowers:brainstorming` directly. This violates the rule above and is deliberate.
+
+  **Evidence:** compliant wording scored **0/9** on greenfield discovery — nine reps across three candidate wordings, zero invocations. Every rep went to `superpowers:brainstorming` and stayed. Evolve-mode triggers ("add a service") scored 3/3 with the same compliant wording.
+
+  **Cause:** `superpowers:using-superpowers` injects `"Let's build X" → superpowers:brainstorming first` into the always-loaded session context. That is a directive, not a competing description. A description cannot outrank a directive; only a directive that contradicts it by name can.
+
+  **Accepted risk:** if superpowers renames or restructures that rule, the router silently loses init-mode discovery. Mitigated two ways — (1) `tests/scenarios/router-discovery.md` is a committed regression test that catches it, and (2) `deciding-architecture` independently owns the stack/database/component triggers, so the doctrine still engages at decision time even if the router's description stops winning.
+
+  **This exception does not generalize.** Every other skill in this plugin follows the rule. If you are reading this while writing a new skill, the answer is no.
 - **Cross-references:** skill name only, marked `**REQUIRED SUB-SKILL:**` or `**REQUIRED BACKGROUND:**`. Never `@`-links — they force-load and burn context.
-- **Word budget:** router `<200` words (it loads often). Other `SKILL.md` `<500` words. Overflow goes to `references/`.
+- **Word budget:** router `<300` words. Other `SKILL.md` `<500` words. Overflow goes to `references/`.
+
+  **Amended 2026-07-17 from `<200`, on Task 3 review evidence.** The verbatim invariants do not fit in 200 words, so the original budget forced an abridged invariant 2 — silently dropping "Conventions that are cheap now and expensive to retrofit should be adopted by default, not gated," the clause the i18n doctrine depends on. The spec is not loaded at runtime; the router is. Where the two constraints conflict, **doctrine integrity wins over the word target**. The `<200` figure came from writing-skills' guidance for skills that load into *every* conversation; this router loads on trigger, so the tighter budget never applied to it.
 - **Flowcharts:** only for non-obvious decisions. Never for reference material, code, or linear steps.
 - **Doctrine wording is normative.** The four invariants and the nine decision steps are copied verbatim from the spec. Do not paraphrase them — the spec's phrasing was argued for and is load-bearing.
+
+  **Rationale vs. rules (added 2026-07-18, approved by Greg).** A skill MAY carry explanatory rationale that is not in the spec — text that explains *why* a spec rule holds ("blobs in a database inflate backups, slow replication, and blow out row sizes for data nobody queries"). Rationale teaches; it helps an agent reason about edge cases instead of applying a rule mechanically. A skill MAY NOT introduce new *doctrine* — a rule, gate, threshold, or required behavior the spec does not state. Rationale explains an existing rule; a new rule needs Greg's approval and belongs in the spec first. When unsure which side of the line a sentence falls on, treat it as a rule and leave it out. This does not loosen the verbatim requirement above: the invariants and the nine steps are still copied exactly; rationale is *additional* surrounding text, never a paraphrase of the normative text itself.
 - **Every gate, including a failed one, emits an ADR.** A rejection with no ADR is a bug.
 - **Commit after every task.**
 
@@ -297,17 +333,25 @@ Operational complexity is the enemy. Statefulness is its primary source.
 
 ## The four invariants
 
+<!-- VERBATIM FROM THE SPEC. Do not abridge to fit a word budget — the budget
+     was raised to <300 precisely so this text could stay whole. -->
+
 1. **Stateless-first** — a backend service must be killable at any instant with
    no loss. No local sessions, no in-process shared state, no sticky routing,
    no local writes outside `/tmp` scratch.
 2. **Complexity minimalism** — every component added is operational burden
    forever. Absence is the default; presence needs a reason on record.
-   **Scope: operational components only** — things you run, monitor, back up.
-   Not code conventions. A YAML dictionary adds no operational surface.
-3. **One backend language** — chosen once, all N services use it. Frontend
-   TypeScript is a different tier, not a violation.
-4. **Evidence before components** — a named pattern or a measurement, or the
-   component does not enter.
+
+   **Scope of this invariant: operational components only** — things you run,
+   monitor, and back up. It does *not* govern code conventions. A YAML
+   dictionary, a repository interface, or a logging convention adds no
+   operational surface, so the reasoning that rejects premature Redis does not
+   transfer to them. Conventions that are cheap now and expensive to retrofit
+   should be adopted by default, not gated.
+3. **One backend language** — chosen once, all N services use it. (Frontend
+   TypeScript is not a violation; it is a different tier.)
+4. **Evidence before components** — no component enters on a hunch. A named
+   pattern or a measurement, or it does not enter.
 
 ## Routing
 
@@ -362,6 +406,19 @@ Run: `wc -w skills/1-n-cqds/SKILL.md`
 Expected: under 200. Over budget → move detail to `references/`, not into the router.
 
 - [ ] **Step 5: Verify GREEN**
+
+**AMENDED 2026-07-17 — this step is SUPERSEDED. Approved by Greg; recorded here because a verbal authorization that never reaches the plan is not on record.**
+
+The step below is void. Task 2's corrected baseline came back **3/3 correct without the skill**, so re-running the same scenario with the skill cannot distinguish a good router from an empty file — the test has no signal left.
+
+Per writing-skills, a skill with no observed discipline failure is a **reference skill**, tested for retrieval and application rather than pressure. For a router, application means: *does it route?* The substituted tests are:
+
+- **Test A — discovery + init routing.** Bare `git init` dir, prompt `"I want to build a tool for tracking my houseplants' watering schedules. Help me get started."` Pass = skill surfaces unprompted from its description, identifies init, heads for purpose before stack.
+- **Test B — evolve routing.** Dir with a plausible `ARCHITECTURE.md`, prompt `"Add a service that generates PDF exports."` Pass = identifies evolve, reads the record, does not replay vision.
+
+Both must be run with fresh `claude -p` processes — installed skills are cached at process start, so Agent-tool subagents never see a freshly-installed skill. See `tests/scenarios/router-discovery.md`.
+
+<!-- VOID — retained to show what was replaced and why. Do not execute. -->
 
 Re-run `tests/scenarios/router-statelessness.md`, 3 reps, **with** the skill present. Prepend to the scenario:
 
@@ -988,8 +1045,13 @@ C4 Context + Container only. Component/Code levels are delegated to the `c4-arch
 
 ## State inventory
 
-| State | Shape | Lifetime | Destination | ADR |
-|---|---|---|---|---|
+| State | Shape | Lifetime | Size | Destination | ADR |
+|---|---|---|---|---|---|
+
+<!-- The Size column carries Step 1's "size estimate" field. Data volume is a
+     decision input the gates consume: MariaDB-vs-Postgres (horizontal scale),
+     the cache gate (expensive to compute), blob-vs-DB on the storage ladder.
+     Step 1 collects it; this table records it. Do not drop one without the other. -->
 
 ## Stack
 
