@@ -30,7 +30,7 @@ substitute for purpose. Record it as a constraint, then proceed.
 
 Brainstorming on its own tends to narrow "purpose" down to whatever
 question unblocks the very next artifact, then silently assumes the rest.
-That is not this gate. All five fields below get answered before any
+That is not this gate. All six fields below get answered before any
 schema or stack line is written — not just the one question that happens
 to fork a table.
 
@@ -43,6 +43,7 @@ Write `docs/purpose.md`:
 - **Success** — what is true when this works.
 - **Non-goals** — what this is deliberately not.
 - **Stated constraints** — anything the user pre-decided, and why they say so.
+- **Primary user journey** — the one end-to-end path that matters most, in a sentence. It becomes the mandatory e2e test later. If you can't name one, the purpose isn't concrete enough yet.
 
 ## Rationalization table
 

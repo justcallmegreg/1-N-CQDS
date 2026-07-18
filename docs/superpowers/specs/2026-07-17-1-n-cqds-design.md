@@ -132,7 +132,7 @@ Postgres already caches; premature Redis duplicates it badly.
 
 Only if a named pattern exists:
 
-- work that must outlive a request (file processing, report generation)
+- work that must outlive a request — too large or slow to finish in-request (bulk file processing; a report too big to render within a request timeout)
 - fanout to N consumers (webhooks, notifications)
 - buffering a rate-limited external dependency
 - deferred or retried work with retry semantics
@@ -189,6 +189,8 @@ repo/
 - UI quality delegated to the `frontend-design` skill.
 - Mock is built **after** the tech stack is decided, on the chosen framework.
 - **Coolify is the preview host** for the mock — a deployment target giving stakeholders a clickable URL before backends exist. Coolify is not a mock authoring tool.
+
+`docs/purpose.md` includes a **Primary user journey** — the single most important end-to-end path a user takes (e.g. "record an observation offline → sync → generate the season PDF"). Plan 3 turns it into the mandatory Playwright e2e case.
 
 ### Playwright
 
