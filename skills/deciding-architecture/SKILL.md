@@ -40,8 +40,7 @@ Write the inventory into `ARCHITECTURE.md` before step 2.
 ## Step 7 — Service decomposition
 
 The N, derived from the purpose — not from taxonomy. "User service, auth
-service, notification service" is a template, not a design. Each service
-must trace to something the purpose says the software does.
+service, notification service" is a template, not a design.
 
 Applying invariant 2: default N is 1; a second service needs a reason on
 record.
@@ -49,8 +48,8 @@ record.
 ## Rejections are first-class
 
 A failed gate still emits an ADR — *"Queue rejected: no async workload
-identified."* That rejection is what governor mode enforces against later.
-Without it, the skill cannot distinguish drift from legitimate
+identified."* **That rejection is what governor mode enforces against
+later.** Without it, the skill cannot distinguish drift from legitimate
 reconsideration. **A rejection with no ADR is a bug.**
 
 ## ADR convention
