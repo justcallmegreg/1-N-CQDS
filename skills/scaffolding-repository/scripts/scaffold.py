@@ -28,6 +28,15 @@ def render_compose(config: dict) -> str:
     null in config) MUST NOT appear in the emitted compose file. The template
     asset holds every possible fragment; this function selects only the
     fragments whose component was actually approved.
+
+    Edge case: if every infra component is null (permitted — a fully
+    stateless service could reject database, object storage, cache, and
+    queue alike), the "services:" and "volumes:" keys must still be valid
+    YAML mappings. A bare "services:" with no indented children parses as
+    null, which `docker compose config` rejects ("services must be a
+    mapping"). When zero fragments are selected for a key, that key is
+    emitted as an explicit empty mapping ("services: {}" / "volumes: {}")
+    instead of being left dangling.
     """
     raw = (ASSETS / "docker-compose.tmpl.yml").read_text()
     frags = {}
@@ -39,15 +48,30 @@ def render_compose(config: dict) -> str:
             frags[cur].append(line)
     def block(name): return "\n".join(frags.get(name, []))
     comp = config["components"]
-    out = [block("HEADER")]
-    if comp.get("database") == "postgres": out.append(block("DATABASE:postgres"))
-    if comp.get("object_storage") == "minio": out.append(block("OBJECT_STORAGE:minio"))
-    if comp.get("cache") == "redis": out.append(block("CACHE:redis"))
-    if comp.get("queue") == "rabbitmq": out.append(block("QUEUE:rabbitmq"))
+    has_db = comp.get("database") == "postgres"
+    has_obj = comp.get("object_storage") == "minio"
+    has_cache = comp.get("cache") == "redis"
+    has_queue = comp.get("queue") == "rabbitmq"
+    any_service = has_db or has_obj or has_cache or has_queue
+    any_volume = has_db or has_obj
+
+    header_lines = list(frags.get("HEADER", []))
+    if not any_service and header_lines and header_lines[-1] == "services:":
+        header_lines[-1] = "services: {}"
+
+    volumes_lines = list(frags.get("VOLUMES", []))
+    if not any_volume and volumes_lines and volumes_lines[-1] == "volumes:":
+        volumes_lines[-1] = "volumes: {}"
+
+    out = ["\n".join(header_lines)]
+    if has_db: out.append(block("DATABASE:postgres"))
+    if has_obj: out.append(block("OBJECT_STORAGE:minio"))
+    if has_cache: out.append(block("CACHE:redis"))
+    if has_queue: out.append(block("QUEUE:rabbitmq"))
     out.append(block("APPSTUB"))
-    out.append(block("VOLUMES"))
-    if comp.get("database") == "postgres": out.append(block("VOL:db"))
-    if comp.get("object_storage") == "minio": out.append(block("VOL:obj"))
+    out.append("\n".join(volumes_lines))
+    if has_db: out.append(block("VOL:db"))
+    if has_obj: out.append(block("VOL:obj"))
     text = "\n".join(out)
     for k, v in {"NAME": config["name"]}.items():
         text = text.replace("{{" + k + "}}", str(v))

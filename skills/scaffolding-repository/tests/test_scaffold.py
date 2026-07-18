@@ -70,3 +70,25 @@ def test_compose_config_validates(tmp_path):
     r = subprocess.run([engine, "compose", "-f", str(out / "docker-compose.yml"), "config"],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
+
+def test_compose_valid_with_zero_infra_components(tmp_path):
+    # A genuinely stateless service could reject database, object storage,
+    # cache, AND queue. services:/volumes: must still be valid YAML mappings,
+    # not dangling/null keys, or `docker compose config` fails outright.
+    cfg = dict(BASE_CONFIG)
+    cfg["components"] = {"database": None, "object_storage": None, "cache": None, "queue": None}
+    out = run_scaffold(tmp_path, cfg)
+    compose_path = out / "docker-compose.yml"
+    text = compose_path.read_text()
+    lines = text.splitlines()
+    assert "services: {}" in lines, "services: must be an explicit empty mapping, not dangling/null"
+    for line in lines:
+        assert line.strip() != "services:", "bare 'services:' with no children parses as null"
+        assert line.strip() != "volumes:", "bare 'volumes:' with no children parses as null"
+    import shutil
+    engine = "docker" if shutil.which("docker") else ("podman" if shutil.which("podman") else None)
+    if not engine:
+        import pytest; pytest.skip("no container engine available")
+    r = subprocess.run([engine, "compose", "-f", str(compose_path), "config"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
