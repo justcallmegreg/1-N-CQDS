@@ -1,4 +1,5 @@
 import json, subprocess, sys
+import pytest
 from pathlib import Path
 
 SCRIPT = Path(__file__).parent.parent / "scripts" / "scaffold.py"
@@ -105,3 +106,27 @@ def test_compose_valid_with_zero_infra_components(tmp_path):
     r = subprocess.run([engine, "compose", "-f", str(compose_path), "config"],
                        capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
+
+@pytest.mark.parametrize("slug,marker", [
+    ("MIT", "Permission is hereby granted"),
+    ("Apache-2.0", "Apache License"),
+    ("MPL-2.0", "Mozilla Public License"),
+    ("AGPL-3.0", "GNU AFFERO GENERAL PUBLIC LICENSE"),
+    ("BSL-1.1", "Business Source License"),
+])
+def test_license_emitted(tmp_path, slug, marker):
+    cfg = dict(BASE_CONFIG, license=slug)
+    out = run_scaffold(tmp_path, cfg)
+    assert marker in (out / "LICENSE").read_text()
+
+def test_bsl_carries_legal_disclaimer(tmp_path):
+    out = run_scaffold(tmp_path, dict(BASE_CONFIG, license="BSL-1.1"))
+    text = (out / "LICENSE").read_text().lower()
+    assert "legal" in text and "advis" in text, "BSL must direct the user to a legal advisor"
+
+def test_unknown_license_errors(tmp_path):
+    import json, subprocess, sys
+    cfg = tmp_path / "c.json"; cfg.write_text(json.dumps(dict(BASE_CONFIG, license="WTFPL")))
+    r = subprocess.run([sys.executable, str(SCRIPT), "--config", str(cfg), "--dest", str(tmp_path/"o")],
+                       capture_output=True, text=True)
+    assert r.returncode != 0, "unknown license must fail loudly, not silently emit nothing"

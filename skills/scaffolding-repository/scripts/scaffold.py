@@ -10,6 +10,8 @@ from pathlib import Path
 
 ASSETS = Path(__file__).parent.parent / "assets"
 
+VALID_LICENSES = {"MIT", "Apache-2.0", "MPL-2.0", "AGPL-3.0", "BSL-1.1"}
+
 def load_config(args) -> dict:
     if args.config:
         return json.loads(Path(args.config).read_text())
@@ -78,6 +80,10 @@ def render_compose(config: dict) -> str:
     return text
 
 def scaffold(config: dict, dest: Path) -> list[Path]:
+    lic = config["license"]
+    if lic not in VALID_LICENSES:
+        raise SystemExit(f"unknown license '{lic}'; choose one of {sorted(VALID_LICENSES)}")
+
     created = []
     def mkdir(rel):
         p = dest / rel
@@ -100,6 +106,7 @@ def scaffold(config: dict, dest: Path) -> list[Path]:
     write("README.md", render("README.tmpl.md", {"NAME": config["name"]}))
     write(".gitignore", render("gitignore.tmpl", {}))
     write("CODEOWNERS", render("CODEOWNERS.tmpl", {"NAME": config["name"]}))
+    write("LICENSE", (ASSETS / "licenses" / f"{lic}.txt").read_text())
     return created
 
 def main():
