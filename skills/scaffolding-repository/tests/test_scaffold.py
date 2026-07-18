@@ -41,3 +41,32 @@ def test_makefile_help_runs(tmp_path):
     r = subprocess.run(["make", "-C", str(out), "help"], capture_output=True, text=True)
     assert r.returncode == 0, r.stderr
     assert "up" in r.stdout and "down" in r.stdout
+
+def test_compose_includes_approved_components(tmp_path):
+    out = run_scaffold(tmp_path, BASE_CONFIG)  # postgres + minio approved
+    compose = (out / "docker-compose.yml").read_text()
+    assert "postgres" in compose
+    assert "minio" in compose
+
+def test_compose_omits_rejected_components(tmp_path):
+    # cache and queue are null (rejected) in BASE_CONFIG
+    out = run_scaffold(tmp_path, BASE_CONFIG)
+    compose = (out / "docker-compose.yml").read_text().lower()
+    assert "redis" not in compose, "rejected cache must not appear"
+    assert "rabbitmq" not in compose and "amqp" not in compose, "rejected queue must not appear"
+
+def test_compose_includes_cache_when_approved(tmp_path):
+    cfg = dict(BASE_CONFIG); cfg["components"] = dict(BASE_CONFIG["components"], cache="redis")
+    out = run_scaffold(tmp_path, cfg)
+    assert "redis" in (out / "docker-compose.yml").read_text().lower()
+
+def test_compose_config_validates(tmp_path):
+    out = run_scaffold(tmp_path, BASE_CONFIG)
+    # docker or podman may be absent in CI; skip the runtime check gracefully
+    import shutil
+    engine = "docker" if shutil.which("docker") else ("podman" if shutil.which("podman") else None)
+    if not engine:
+        import pytest; pytest.skip("no container engine available")
+    r = subprocess.run([engine, "compose", "-f", str(out / "docker-compose.yml"), "config"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
