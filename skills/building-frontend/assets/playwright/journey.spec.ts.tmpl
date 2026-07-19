@@ -1,0 +1,13 @@
+// journey.spec.ts.tmpl — the primary-user-journey case. {{JOURNEY}} filled per project
+// from docs/purpose.md's Primary user journey. Example fill shown in a comment.
+import { test, expect } from "@playwright/test";
+
+// Primary user journey (from docs/purpose.md): {{JOURNEY}}
+// e.g. "record an observation offline → it appears in the list → survives reload"
+test("primary user journey: {{JOURNEY_SHORT}}", async ({ page }) => {
+  await page.goto("/");
+  // TODO(per-project): drive the actual journey. This template MUST be filled,
+  // not shipped as-is — an unfilled journey test is an incomplete frontend.
+  // The building-frontend skill fills it from the purpose doc.
+  expect(true).toBe(true);
+});
