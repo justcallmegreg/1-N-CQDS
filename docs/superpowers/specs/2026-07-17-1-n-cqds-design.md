@@ -185,8 +185,16 @@ repo/
 
 ## Frontend
 
-- **Astro by default.** **Next.js** offered as the alternative when the app is genuinely app-shaped (heavy client state, auth-gated dashboards) rather than content-shaped. No other alternatives offered.
-- UI quality delegated to the `frontend-design` skill.
+- **Framework chosen by the app's shape** (revised 2026-07-19, ruling — the original Astro-default/Next-alternative menu didn't cover the offline-first case, which the deciding-architecture engine correctly picked React+Vite PWA for on Fieldnote; the menu now matches the engine):
+
+  | App shape | Framework | Why |
+  |---|---|---|
+  | **Content-shaped** (marketing, docs, mostly-static, SEO-critical) | **Astro** | islands, ships minimal JS, best SEO — the default |
+  | **App-shaped** (heavy client state, auth-gated dashboards, SSR wanted) | **Next.js** | SSR + app-router for stateful, server-rendered apps |
+  | **Offline-first / pure-client** (PWA, works with no network, sync-on-reconnect) | **Vite + React PWA** | pure client bundle + service worker; SSR buys nothing when the app must run offline |
+
+  Astro remains the default when the shape is ambiguous. The choice is recorded in an ADR, like every other component decision. No frameworks beyond these three.
+- UI quality delegated to the `frontend-design` skill. The framework choice determines the shell; `frontend-design` determines whether the UI is any good.
 - Mock is built **after** the tech stack is decided, on the chosen framework.
 - **Coolify is the preview host** for the mock — a deployment target giving stakeholders a clickable URL before backends exist. Coolify is not a mock authoring tool.
 
