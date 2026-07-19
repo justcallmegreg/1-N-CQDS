@@ -16,7 +16,9 @@ function writeCookie(name: string, value: string) {
 }
 
 function lookup(dict: Dict, key: string): string {
-  return key.split(".").reduce<unknown>((o, k) => (o && typeof o === "object" ? (o as Dict)[k] : undefined), dict) as string ?? key;
+  const val = key.split(".").reduce<unknown>(
+    (o, k) => (o && typeof o === "object" ? (o as Dict)[k] : undefined), dict);
+  return typeof val === "string" ? val : key;
 }
 
 interface I18n { t: (key: string) => string; locale: string; setLocale: (l: string) => void; locales: string[]; }
