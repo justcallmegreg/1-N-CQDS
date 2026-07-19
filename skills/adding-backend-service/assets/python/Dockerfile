@@ -1,7 +1,11 @@
 # Multi-arch (buildx: linux/amd64,linux/arm64). Non-root. Pinned digest.
 # python:3.12-slim digest below is an example — the skill re-pins to current at build.
 FROM python@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de AS base
-ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+# PYTHONPATH=/app: the alembic console-script entry point (unlike uvicorn,
+# which self-inserts cwd) does NOT put WORKDIR on sys.path, so `alembic
+# upgrade head` fails with `ModuleNotFoundError: No module named 'app'`
+# without this — confirmed by a real boot failure (Plan 4 Task 9).
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PYTHONPATH=/app
 WORKDIR /app
 
 # deps first for layer caching
