@@ -1,0 +1,10 @@
+# de.yaml — same keys, translated
+app:
+  title: "Fieldnote"
+  tagline: "Beobachtungen offline erfassen. Synchronisieren, wenn möglich."
+nav:
+  observations: "Beobachtungen"
+  report: "Saisonbericht"
+actions:
+  add: "Beobachtung hinzufügen"
+  switch_language: "Sprache"

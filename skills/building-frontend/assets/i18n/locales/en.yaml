@@ -1,0 +1,10 @@
+# en.yaml — flat or nested keys; nested shown
+app:
+  title: "Fieldnote"
+  tagline: "Record observations offline. Sync when you can."
+nav:
+  observations: "Observations"
+  report: "Season report"
+actions:
+  add: "Add observation"
+  switch_language: "Language"
