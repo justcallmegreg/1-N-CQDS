@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/driver/postgres"
@@ -43,6 +45,23 @@ func main() {
 			return
 		}
 		writeJSON(w, items)
+	})
+	r.Get("/items/{id}", func(w http.ResponseWriter, req *http.Request) {
+		id, err := strconv.ParseUint(chi.URLParam(req, "id"), 10, 64)
+		if err != nil {
+			http.Error(w, "invalid id", http.StatusBadRequest)
+			return
+		}
+		item, err := repo.Get(uint(id))
+		if err != nil {
+			if errors.Is(err, ErrItemNotFound) {
+				http.Error(w, "not found", http.StatusNotFound)
+				return
+			}
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		writeJSON(w, item)
 	})
 	r.Post("/items", func(w http.ResponseWriter, req *http.Request) {
 		var body struct{ Name string }
