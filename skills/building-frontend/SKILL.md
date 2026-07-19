@@ -41,7 +41,7 @@ Use frontend-design. Build the **primary user journey** from `docs/purpose.md` f
 ## 4. Verify — with Playwright, for real
 
 - **Dev-time:** drive the running app with Playwright, screenshot it, confirm it actually renders. "Looks right in the code" is not verification.
-- **Write the e2e suite in `/e2e`** (repo root, a peer of `frontend/` and `backends/` — it tests the system). Mandatory: the **language switcher** (switch → assert re-render + cookie) and the **primary user journey**. See `assets/playwright/`. The language-switch spec drives `data-testid="app-tagline"` — your App must render it.
+- **Write the e2e suite in `/e2e`** (repo root, a peer of `frontend/` and `backends/` — it tests the system). Mandatory: the **language switcher** (switch → assert re-render + cookie) and the **primary user journey**. See `assets/playwright/`.
 
 ## 5. Preview (Coolify)
 
