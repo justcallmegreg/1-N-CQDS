@@ -1,9 +1,8 @@
 # main.py — FastAPI app. Stateless: no module-level mutable state beyond the
 # engine (a connection pool, not app state). Health is liveness; ready checks DB.
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from sqlalchemy import text
-from .config import load_settings
-from .db import get_session, engine
+from .db import engine
 from .routes import router
 
 app = FastAPI(title="1-N-CQDS service")
