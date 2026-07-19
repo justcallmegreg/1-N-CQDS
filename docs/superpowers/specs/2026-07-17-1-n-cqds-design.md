@@ -118,6 +118,13 @@ Rejected: mapping hiring-strategy personas to languages (`enterprise → Java/C#
 - Go/SQL → GORM
 - **MongoDB** → no ODM buys cross-family portability, so the portability layer is a hand-written **repository pattern**. Services talk to repositories, never to the driver.
 
+**Tier-1 service-skeleton defaults** (added 2026-07-19; the web framework is a per-project choice the engine records in an ADR — these are the skeleton's starting points, not mandates):
+
+- **Python** → **FastAPI** (ASGI) + SQLAlchemy + Alembic. The service exposes a health endpoint and talks to a **repository layer** over SQLAlchemy, never to sessions directly — so the SQL engine (Postgres↔MariaDB) and even the family (→ a Mongo repository) can change behind the same interface.
+- **Go** → stdlib **net/http** + **chi** (a thin router, no heavy framework) + GORM, same repository discipline.
+
+Even with an ORM, services call **repositories**, not the ORM session/driver — the repository is the seam that makes the storage decision reversible. This is the code-level realization of the "one genuinely irreversible decision" scrutiny on SQL-vs-Document: within a family the swap is a repository-implementation change, not a rewrite.
+
 ### 7. Service decomposition
 
 The N, derived from the purpose — not from taxonomy.
