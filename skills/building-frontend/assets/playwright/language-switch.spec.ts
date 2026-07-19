@@ -1,4 +1,10 @@
 // language-switch.spec.ts — the mandatory e2e case. Runtime switch + cookie persistence.
+//
+// MANDATORY e2e case: runtime language switch. The STRUCTURE is reusable as-is.
+// Adapt TWO project-specific things when you copy this into a new app:
+//   1. Your App must render the primary localized string in an element with
+//      data-testid="app-tagline" (bound to t("app.tagline")). This spec drives it.
+//   2. Replace the asserted tagline substrings below with YOUR en/de dictionary values.
 import { test, expect } from "@playwright/test";
 
 test("switches language at runtime without reload and persists via cookie", async ({ page }) => {
