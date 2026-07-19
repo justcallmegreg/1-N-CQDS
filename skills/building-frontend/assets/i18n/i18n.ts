@@ -1,6 +1,7 @@
 // i18n.ts — minimal runtime i18n for Vite+React. YAML is imported as objects
 // (via vite-plugin-yaml or a loader); here we type the shape.
-import { createContext, useContext, useState, useCallback, ReactNode, createElement } from "react";
+import { createContext, useContext, useState, useCallback, createElement } from "react";
+import type { ReactNode } from "react";
 
 export type Dict = Record<string, unknown>;
 const COOKIE = "locale";
