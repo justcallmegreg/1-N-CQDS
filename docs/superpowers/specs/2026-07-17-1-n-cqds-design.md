@@ -35,7 +35,7 @@ A plugin with a router skill and seven phase skills. Chosen over a single skill 
     │   └── scripts/scaffold.py
     ├── building-frontend/           # Astro + frontend-design + Coolify preview
     ├── adding-backend-service/      # the "N" — also the evolve entry point
-    │   └── assets/{Dockerfile.python, Dockerfile.go, service-skeleton/}
+    │   └── assets/{python/, go/, mongo-repository.md}   # per-language skeletons (Dockerfile lives inside each)
     ├── wiring-delivery/             # CI platform, registry, Trivy, hooks
     │   └── assets/{github/workflows/, gitlab/, hooks/}
     └── managing-releases/           # VERSION.txt, GitFlow, backport
