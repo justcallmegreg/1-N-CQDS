@@ -1,0 +1,18 @@
+# skills/scaffolding-repository/assets/Makefile.tmpl
+# {{NAME}} — local development stack.
+# Container engine defaults to docker; override with: make up CONTAINER_ENGINE=podman
+CONTAINER_ENGINE ?= docker
+COMPOSE = $(CONTAINER_ENGINE) compose
+
+.DEFAULT_GOAL := help
+
+.PHONY: help up down
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
+	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+
+up: ## Bring up the local stack
+	$(COMPOSE) up -d --build
+
+down: ## Tear down the local stack
+	$(COMPOSE) down

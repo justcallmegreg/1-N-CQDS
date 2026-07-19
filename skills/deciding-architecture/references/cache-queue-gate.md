@@ -13,7 +13,7 @@ Postgres already caches; premature Redis duplicates it badly.
 
 Only if a named pattern exists:
 
-- work that must outlive a request (file processing, report generation)
+- work that must outlive a request — too large or slow to finish in-request (bulk file processing; a report too big to render within a request timeout)
 - fanout to N consumers (webhooks, notifications)
 - buffering a rate-limited external dependency
 - deferred or retried work with retry semantics

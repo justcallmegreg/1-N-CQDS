@@ -132,7 +132,7 @@ Postgres already caches; premature Redis duplicates it badly.
 
 Only if a named pattern exists:
 
-- work that must outlive a request (file processing, report generation)
+- work that must outlive a request — too large or slow to finish in-request (bulk file processing; a report too big to render within a request timeout)
 - fanout to N consumers (webhooks, notifications)
 - buffering a rate-limited external dependency
 - deferred or retried work with retry semantics
@@ -189,6 +189,8 @@ repo/
 - UI quality delegated to the `frontend-design` skill.
 - Mock is built **after** the tech stack is decided, on the chosen framework.
 - **Coolify is the preview host** for the mock — a deployment target giving stakeholders a clickable URL before backends exist. Coolify is not a mock authoring tool.
+
+`docs/purpose.md` includes a **Primary user journey** — the single most important end-to-end path a user takes (e.g. "record an observation offline → sync → generate the season PDF"). Plan 3 turns it into the mandatory Playwright e2e case.
 
 ### Playwright
 
@@ -279,7 +281,7 @@ Open source preferred. Templates shipped:
 | `frontend-design` | UI quality in `building-frontend` |
 | `c4-architecture` | governor mode regenerates C4 from the real codebase once services exist |
 
-On C4: `scaffolding-repository` hand-authors the initial Context and Container diagrams from the ADRs, because at scaffold time there is no code to analyze. Once services exist, C4 regeneration delegates to the existing `c4-architecture` plugin rather than duplicating its logic.
+On C4: `deciding-architecture` authors the initial Context and Container diagrams from the ADRs as part of its `ARCHITECTURE.md` synthesis step, because at scaffold time there is no code to analyze. `scaffolding-repository` then *places* that `ARCHITECTURE.md` into the repo and links it from the README — it does not re-author the diagrams (single producer; ruling 2026-07-18). Once services exist, C4 regeneration delegates to the existing `c4-architecture` plugin rather than duplicating its logic.
 
 ## Decisions made in this session
 
